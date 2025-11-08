@@ -21,6 +21,6 @@ class Role extends Model
      */
     public function admins(): BelongsToMany
     {
-        return $this->belongsToMany(Admin::class, 'admin_role');
+        return $this->belongsToMany(Admin::class, 'admin_has_roles');
     }
 }
