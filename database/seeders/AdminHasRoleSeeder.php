@@ -18,7 +18,7 @@ class AdminHasRoleSeeder extends Seeder
         // Get the first admin and first role
         $admin = Admin::first();
         $role = Role::first();
-        
+
         if ($admin && $role) {
             // Attach role to admin using the relationship
             $admin->roles()->attach($role->id);
