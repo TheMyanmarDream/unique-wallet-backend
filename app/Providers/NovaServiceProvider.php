@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\User;
+use App\Models\Admin;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Fortify\Features;
 use Laravel\Nova\Nova;
@@ -12,6 +12,7 @@ use Laravel\Nova\Menu\MenuSection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Http\Request;
 use App\Nova\User as NovaUser;
+use App\Nova\Admin as NovaAdmin;
 
 
 
@@ -25,6 +26,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         parent::boot();
         Nova::mainMenu(function (Request $request) {
             return [
+                MenuSection::make('Admins', [
+                    MenuItem::resource(NovaAdmin::class),
+                ])->icon('shield-check')->collapsable(),
+
                 MenuSection::make('Customers', [
                     MenuItem::resource(NovaUser::class),
                 ])->icon('users')->collapsable(),
@@ -79,10 +84,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             */
             protected function gate(): void
             {
-                Gate::define('viewNova', function (User $user) {
-                    return in_array($user->email, [
-                        auth()->user()->email,
-                    ]);
+                Gate::define('viewNova', function ($user) {
+                    return $user instanceof \App\Models\Admin;
                 });
             }
 
