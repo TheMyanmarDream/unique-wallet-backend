@@ -16,19 +16,16 @@ class RoleSeeder extends Seeder
         // Create roles
         $superAdminRole = Role::create([
             'name' => 'Super Admin',
-            'slug' => 'super-admin',
             'description' => 'Has full access to all features',
         ]);
 
         $adminRole = Role::create([
             'name' => 'Admin',
-            'slug' => 'admin',
             'description' => 'Has access to admin features',
         ]);
 
         $moderatorRole = Role::create([
             'name' => 'Moderator',
-            'slug' => 'moderator',
             'description' => 'Has limited admin access',
         ]);
 
