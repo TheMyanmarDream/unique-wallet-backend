@@ -11,6 +11,8 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Resource;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use Illuminate\Support\Collection;
 
 class Brand extends Resource
 {
@@ -40,6 +42,11 @@ class Brand extends Resource
             Image::make('Brand Image')
                 ->disk('public')
                 ->rules('required', 'image', 'max:2048'),
+
+            Text::make('Brand QR Code')
+                ->readonly()
+                ->hideFromIndex()
+                ->help('QR code will be auto-generated when the brand is saved'),
 
             Select::make('Monday')
                 ->options([
@@ -122,5 +129,24 @@ class Brand extends Resource
             HasMany::make('Admins'),
             HasMany::make('User Wallets', 'userWallets', UserWallet::class),
         ];
+    }
+
+    /**
+     * Fill a new model instance using the given request.
+     */
+    protected static function fillFields(NovaRequest $request, $model, Collection $fields): array
+    {
+        $fieldResults = parent::fillFields($request, $model, $fields);
+
+        // Auto-generate QR code if it's a new brand or QR code is empty
+        if (!$model->exists || !$model->brand_qr_code) {
+            // Save the model first to get an ID if it's new
+            if (!$model->exists) {
+                $model->save();
+            }
+            $model->brand_qr_code = $model->generateQrCode();
+        }
+
+        return $fieldResults;
     }
 }

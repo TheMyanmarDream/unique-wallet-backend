@@ -16,6 +16,7 @@ class Brand extends Model
         'description',
         'place',
         'brand_image',
+        'brand_qr_code',
         'monday',
         'tuesday',
         'wednesday',
@@ -48,5 +49,28 @@ class Brand extends Model
     public function userWallets(): HasMany
     {
         return $this->hasMany(UserWallet::class);
+    }
+
+    /**
+     * Generate QR code for the brand.
+     */
+    public function generateQrCode(): string
+    {
+        // Generate QR code data with brand ID
+        return 'BRAND_' . str_pad($this->id, 6, '0', STR_PAD_LEFT) . '_' . time();
+    }
+
+    /**
+     * Get QR code URL for display.
+     */
+    public function getQrCodeUrlAttribute(): string
+    {
+        if (!$this->brand_qr_code) {
+            return '';
+        }
+        
+        // You can use any QR code generation service
+        // Example using Google Charts API (for demo purposes)
+        return 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=' . urlencode($this->brand_qr_code);
     }
 }
