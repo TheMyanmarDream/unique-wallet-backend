@@ -31,5 +31,18 @@ class AppServiceProvider extends ServiceProvider
                 $brand->updateQuietly(['brand_qr_code' => $qrCodePath]);
             }
         });
+
+        // User Wallet QR Code generation observer
+        \App\Models\User::created(function ($user) {
+            $qrCodePath = $user->generateWalletQrCode();
+            $user->updateQuietly(['wallet_qr_code' => $qrCodePath]);
+        });
+
+        \App\Models\User::updated(function ($user) {
+            if (empty($user->wallet_qr_code)) {
+                $qrCodePath = $user->generateWalletQrCode();
+                $user->updateQuietly(['wallet_qr_code' => $qrCodePath]);
+            }
+        });
     }
 }

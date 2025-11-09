@@ -7,11 +7,13 @@ use Laravel\Nova\Auth\PasswordValidationRules;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Illuminate\Support\Collection;
 
 class User extends Resource
 {
@@ -85,9 +87,13 @@ class User extends Resource
                 ->hideFromIndex()
                 ->nullable(),
 
-            Text::make('Wallet QR Code')
+            Image::make('Wallet QR Code')
+                ->disk('public')
+                ->readonly()
                 ->hideFromIndex()
-                ->nullable(),
+                ->hideWhenCreating()
+                ->hideWhenUpdating()
+                ->help('Wallet QR code will be auto-generated when the user is saved'),
 
             Select::make('Plan')
                 ->options([
@@ -101,6 +107,25 @@ class User extends Resource
                 ->default(1)
                 ->nullable(),
         ];
+    }
+
+    /**
+     * Fill a new model instance using the given request.
+     */
+    protected static function fillFields(NovaRequest $request, $model, Collection $fields): array
+    {
+        $fieldResults = parent::fillFields($request, $model, $fields);
+
+        // Auto-generate Wallet QR code if it's a new user or QR code is empty
+        if (!$model->exists || !$model->wallet_qr_code) {
+            // Save the model first to get an ID if it's new
+            if (!$model->exists) {
+                $model->save();
+            }
+            $model->wallet_qr_code = $model->generateWalletQrCode();
+        }
+
+        return $fieldResults;
     }
 
     /**
