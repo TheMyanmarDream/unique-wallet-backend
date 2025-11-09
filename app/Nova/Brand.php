@@ -43,9 +43,12 @@ class Brand extends Resource
                 ->disk('public')
                 ->rules('required', 'image', 'max:2048'),
 
-            Text::make('Brand QR Code')
+            Image::make('Brand QR Code')
+                ->disk('public')
                 ->readonly()
                 ->hideFromIndex()
+                ->hideWhenCreating()
+                ->hideWhenUpdating()
                 ->help('QR code will be auto-generated when the brand is saved'),
 
             Select::make('Monday')
