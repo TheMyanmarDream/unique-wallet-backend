@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Nova\User as NovaUser;
 use App\Nova\Admin as NovaAdmin;
 use App\Nova\UserWallet as NovaUserWallet;
+use App\Nova\UserWalletOut as NovaUserWalletOut;
 use App\Nova\Brand as NovaBrand;
 use App\Nova\Role as NovaRole;
 
@@ -41,6 +42,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make('Customers', [
                     MenuItem::resource(NovaUser::class),
                     MenuItem::resource(NovaUserWallet::class),
+                    MenuItem::resource(NovaUserWalletOut::class),
                 ])->icon('users')->collapsable(),
 
 
