@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class Brand extends Model
 {
@@ -57,20 +59,54 @@ class Brand extends Model
     public function generateQrCode(): string
     {
         // Generate QR code data with brand ID
-        return 'BRAND_' . str_pad($this->id, 6, '0', STR_PAD_LEFT) . '_' . time();
+        $qrData = 'BRAND_' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        
+        // Create QR code
+        $qrCode = QrCode::create($qrData);
+        $writer = new PngWriter();
+        
+        // Generate QR code and save as PNG
+        $qrCodePath = 'qr_codes/brand_' . $this->id . '.png';
+        $fullPath = storage_path('app/public/' . $qrCodePath);
+        
+        // Create directory if it doesn't exist
+        if (!file_exists(dirname($fullPath))) {
+            mkdir(dirname($fullPath), 0755, true);
+        }
+        
+        // Generate and save QR code
+        $result = $writer->write($qrCode);
+        $result->saveToFile($fullPath);
+        
+        return $qrCodePath;
     }
 
     /**
-     * Get QR code URL for display.
+     * Generate QR code for the brand (Alternative: HTTP-based).
      */
-    public function getQrCodeUrlAttribute(): string
+    public function generateQrCodeAlternative(): string
     {
-        if (!$this->brand_qr_code) {
-            return '';
+        // Generate QR code data with brand ID
+        $qrData = 'BRAND_' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        
+        // Generate QR code using external service
+        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($qrData);
+        
+        // Download and save QR code locally
+        $qrCodePath = 'qr_codes/brand_' . $this->id . '.png';
+        $fullPath = storage_path('app/public/' . $qrCodePath);
+        
+        // Create directory if it doesn't exist
+        if (!file_exists(dirname($fullPath))) {
+            mkdir(dirname($fullPath), 0755, true);
         }
         
-        // You can use any QR code generation service
-        // Example using Google Charts API (for demo purposes)
-        return 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=' . urlencode($this->brand_qr_code);
+        // Download and save QR code
+        $qrCodeContent = file_get_contents($qrCodeUrl);
+        if ($qrCodeContent !== false) {
+            file_put_contents($fullPath, $qrCodeContent);
+        }
+        
+        return $qrCodePath;
     }
 }
