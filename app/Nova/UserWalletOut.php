@@ -21,6 +21,33 @@ class UserWalletOut extends Resource
         'id', 'amount',
     ];
 
+    /**
+     * Build an "index" query for the given resource.
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        $admin = auth('admin')->user();
+
+        if (!$admin) {
+            return $query->whereNull('id'); // Return no results if not authenticated
+        }
+
+        // Check if admin has Finance Manager role
+        if ($admin->roles()->where('name', 'Finance Manager')->exists()) {
+            // Finance Manager can see all wallet out entries
+            return $query;
+        }
+
+        // Check if admin has Manager role
+        if ($admin->roles()->where('name', 'Manager')->exists()) {
+            // Manager can only see entries for their specific brand
+            return $query->where('brand_id', $admin->brand_id);
+        }
+
+        // For other roles, only show entries for their brand
+        return $query->where('brand_id', $admin->brand_id);
+    }
+
     public function fields(Request $request)
     {
         return [
