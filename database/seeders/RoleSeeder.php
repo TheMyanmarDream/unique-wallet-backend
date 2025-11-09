@@ -26,15 +26,16 @@ class RoleSeeder extends Seeder
             'name' => 'Moderator',
         ]);
 
-        // Create default super admin
-        $superAdmin = Admin::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@admin.com',
-            'password' => bcrypt('password'),
-            'email_verified_at' => now(),
+        $managerRole = Role::create([
+            'name' => 'Manager',
         ]);
 
-        // Assign super admin role
-        $superAdmin->roles()->attach($superAdminRole);
+        $staffRole = Role::create([
+            'name' => 'Staff',
+        ]);
+
+        $financeManagerRole = Role::create([
+            'name' => 'Finance Manager',
+        ]);
     }
 }

@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Http\Request;
 use App\Nova\User as NovaUser;
 use App\Nova\Admin as NovaAdmin;
+use App\Nova\UserWallet as NovaUserWallet;
+use App\Nova\Brand as NovaBrand;
+use App\Nova\Role as NovaRole;
 
 
 
@@ -28,10 +31,16 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             return [
                 MenuSection::make('Admins', [
                     MenuItem::resource(NovaAdmin::class),
+                    MenuItem::resource(NovaRole::class),
                 ])->icon('shield-check')->collapsable(),
+
+                MenuSection::make('Brands', [
+                    MenuItem::resource(NovaBrand::class),
+                ])->icon('building-office')->collapsable(),
 
                 MenuSection::make('Customers', [
                     MenuItem::resource(NovaUser::class),
+                    MenuItem::resource(NovaUserWallet::class),
                 ])->icon('users')->collapsable(),
 
 

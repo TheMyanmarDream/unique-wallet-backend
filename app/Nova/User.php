@@ -4,9 +4,12 @@ namespace App\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Auth\PasswordValidationRules;
+use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -34,7 +37,7 @@ class User extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'id', 'name', 'email', 'phone_number',
     ];
 
     /**
@@ -63,6 +66,40 @@ class User extends Resource
                 ->onlyOnForms()
                 ->creationRules($this->passwordRules())
                 ->updateRules($this->optionalPasswordRules()),
+
+            Date::make('Birth Date')
+                ->nullable(),
+
+            Text::make('Phone Number')
+                ->rules('required', 'max:20'),
+
+            Select::make('Gender')
+                ->options([
+                    'male' => 'Male',
+                    'female' => 'Female',
+                    'other' => 'Other',
+                ])
+                ->nullable(),
+
+            Text::make('QR Code')
+                ->hideFromIndex()
+                ->nullable(),
+
+            Text::make('Wallet QR Code')
+                ->hideFromIndex()
+                ->nullable(),
+
+            Select::make('Plan')
+                ->options([
+                    'basic' => 'Basic',
+                    'premium' => 'Premium',
+                    'vip' => 'VIP',
+                ])
+                ->nullable(),
+
+            Number::make('Benefit ID')
+                ->default(1)
+                ->nullable(),
         ];
     }
 

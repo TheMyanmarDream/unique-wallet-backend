@@ -21,6 +21,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'birth_date',
+        'phone_number',
+        'gender',
+        'qr_code',
+        'wallet_qr_code',
+        'plan',
+        'benefit_id',
     ];
 
     /**
@@ -43,6 +50,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birth_date' => 'date',
         ];
     }
 }
