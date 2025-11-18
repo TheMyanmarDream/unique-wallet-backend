@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Auth\PasswordValidationRules;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Gravatar;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Fields\Number;
@@ -14,6 +15,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Resource
 {
@@ -84,7 +86,16 @@ class User extends Resource
                 ->nullable(),
 
             Text::make('QR Code')
+                ->displayUsing(function ($value) {
+                    if ($value) {
+                        $url = 'https://uniquemdy.app/storage/qrcodes/' . $value;
+                        return '<img src="' . $url . '" style="max-width: 200px; max-height: 200px;" />';
+                    }
+                    return null;
+                })
+                ->asHtml()
                 ->hideFromIndex()
+                ->readonly()
                 ->nullable(),
 
             Image::make('Wallet QR Code')
@@ -106,6 +117,8 @@ class User extends Resource
             Number::make('Benefit ID')
                 ->default(1)
                 ->nullable(),
+
+            HasMany::make('User Wallets'),
         ];
     }
 
