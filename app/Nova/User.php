@@ -22,33 +22,33 @@ class User extends Resource
     use PasswordValidationRules;
 
     /**
-     * The model the resource corresponds to.
-     *
-     * @var class-string<\App\Models\User>
-     */
+    * The model the resource corresponds to.
+    *
+    * @var class-string<\App\Models\User>
+    */
     public static $model = \App\Models\User::class;
 
     /**
-     * The single value that should be used to represent the resource when being displayed.
-     *
-     * @var string
-     */
+    * The single value that should be used to represent the resource when being displayed.
+    *
+    * @var string
+    */
     public static $title = 'name';
 
     /**
-     * The columns that should be searched.
-     *
-     * @var array
-     */
+    * The columns that should be searched.
+    *
+    * @var array
+    */
     public static $search = [
         'id', 'name', 'email', 'phone_number',
     ];
 
     /**
-     * Get the fields displayed by the resource.
-     *
-     * @return array<int, \Laravel\Nova\Fields\Field|\Laravel\Nova\Panel|\Laravel\Nova\ResourceTool|\Illuminate\Http\Resources\MergeValue>
-     */
+    * Get the fields displayed by the resource.
+    *
+    * @return array<int, \Laravel\Nova\Fields\Field|\Laravel\Nova\Panel|\Laravel\Nova\ResourceTool|\Illuminate\Http\Resources\MergeValue>
+    */
     public function fields(NovaRequest $request): array
     {
         return [
@@ -57,35 +57,35 @@ class User extends Resource
             Gravatar::make()->maxWidth(50),
 
             Text::make('Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
+            ->sortable()
+            ->rules('required', 'max:255'),
 
             Text::make('Email')
-                ->sortable()
-                ->rules('required', 'email', 'max:254')
-                ->creationRules('unique:users,email')
-                ->updateRules('unique:users,email,{{resourceId}}'),
+            ->sortable()
+            ->rules('required', 'email', 'max:254')
+            ->creationRules('unique:users,email')
+            ->updateRules('unique:users,email,{{resourceId}}'),
 
             Password::make('Password')
-                ->onlyOnForms()
-                ->creationRules($this->passwordRules())
-                ->updateRules($this->optionalPasswordRules()),
+            ->onlyOnForms()
+            ->creationRules($this->passwordRules())
+            ->updateRules($this->optionalPasswordRules()),
 
             Date::make('Birth Date')
-                ->nullable(),
+            ->nullable(),
 
             Text::make('Phone Number')
-                ->rules('required', 'max:20'),
+            ->rules('required', 'max:20'),
 
             Select::make('Gender')
-                ->options([
-                    'male' => 'Male',
-                    'female' => 'Female',
-                    'other' => 'Other',
+            ->options([
+                'male' => 'Male',
+                'female' => 'Female',
+                'other' => 'Other',
                 ])
                 ->nullable(),
 
-            Text::make('QR Code')
+                Text::make('QR Code')
                 ->displayUsing(function ($value) {
                     if ($value) {
                         $url = 'https://uniquemdy.app/storage/qrcodes/' . $value;
@@ -97,87 +97,93 @@ class User extends Resource
                 ->hideFromIndex()
                 ->readonly()
                 ->nullable(),
-
-            Image::make('Wallet QR Code')
-                ->disk('public')
-                ->readonly()
+                Text::make('Wallet QR Code')
+                ->displayUsing(function ($value) {
+                    if ($value) {
+                        $url = 'https://uniquemdy.app/storage/wallet_qrcodes/' . $value;
+                        return '<img src="' . $url . '" style="max-width: 200px; max-height: 200px;" />';
+                    }
+                    return null;
+                })
+                ->asHtml()
                 ->hideFromIndex()
-                ->hideWhenCreating()
-                ->hideWhenUpdating()
-                ->help('Wallet QR code will be auto-generated when the user is saved'),
+                ->readonly()
+                ->nullable(),
 
-            Select::make('Plan')
+
+
+                Select::make('Plan')
                 ->options([
                     'basic' => 'Basic',
                     'premium' => 'Premium',
                     'vip' => 'VIP',
-                ])
-                ->nullable(),
+                    ])
+                    ->nullable(),
 
-            Number::make('Benefit ID')
-                ->default(1)
-                ->nullable(),
+                    Number::make('Benefit ID')
+                    ->default(1)
+                    ->nullable(),
 
-            HasMany::make('User Wallets'),
-        ];
-    }
-
-    /**
-     * Fill a new model instance using the given request.
-     */
-    protected static function fillFields(NovaRequest $request, $model, Collection $fields): array
-    {
-        $fieldResults = parent::fillFields($request, $model, $fields);
-
-        // Auto-generate Wallet QR code if it's a new user or QR code is empty
-        if (!$model->exists || !$model->wallet_qr_code) {
-            // Save the model first to get an ID if it's new
-            if (!$model->exists) {
-                $model->save();
+                    HasMany::make('User Wallets'),
+                ];
             }
-            $model->wallet_qr_code = $model->generateWalletQrCode();
+
+            /**
+            * Fill a new model instance using the given request.
+            */
+            protected static function fillFields(NovaRequest $request, $model, Collection $fields): array
+            {
+                $fieldResults = parent::fillFields($request, $model, $fields);
+
+                // Auto-generate Wallet QR code if it's a new user or QR code is empty
+                if (!$model->exists || !$model->wallet_qr_code) {
+                    // Save the model first to get an ID if it's new
+                    if (!$model->exists) {
+                        $model->save();
+                    }
+                    $model->wallet_qr_code = $model->generateWalletQrCode();
+                }
+
+                return $fieldResults;
+            }
+
+            /**
+            * Get the cards available for the request.
+            *
+            * @return array<int, \Laravel\Nova\Card>
+            */
+            public function cards(NovaRequest $request): array
+            {
+                return [];
+            }
+
+            /**
+            * Get the filters available for the resource.
+            *
+            * @return array<int, \Laravel\Nova\Filters\Filter>
+            */
+            public function filters(NovaRequest $request): array
+            {
+                return [];
+            }
+
+            /**
+            * Get the lenses available for the resource.
+            *
+            * @return array<int, \Laravel\Nova\Lenses\Lens>
+            */
+            public function lenses(NovaRequest $request): array
+            {
+                return [];
+            }
+
+            /**
+            * Get the actions available for the resource.
+            *
+            * @return array<int, \Laravel\Nova\Actions\Action>
+            */
+            public function actions(NovaRequest $request): array
+            {
+                return [];
+            }
         }
-
-        return $fieldResults;
-    }
-
-    /**
-     * Get the cards available for the request.
-     *
-     * @return array<int, \Laravel\Nova\Card>
-     */
-    public function cards(NovaRequest $request): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the filters available for the resource.
-     *
-     * @return array<int, \Laravel\Nova\Filters\Filter>
-     */
-    public function filters(NovaRequest $request): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the lenses available for the resource.
-     *
-     * @return array<int, \Laravel\Nova\Lenses\Lens>
-     */
-    public function lenses(NovaRequest $request): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the actions available for the resource.
-     *
-     * @return array<int, \Laravel\Nova\Actions\Action>
-     */
-    public function actions(NovaRequest $request): array
-    {
-        return [];
-    }
-}
