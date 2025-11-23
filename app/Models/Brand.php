@@ -57,7 +57,7 @@ class Brand extends Model
     public function generateQrCode(): string
     {
         // Generate QR code data with brand ID
-        $qrData = 'BRAND_' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        $qrData = $this->id.'/BRAND_' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
 
         // Generate QR code using external service
         $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($qrData);
